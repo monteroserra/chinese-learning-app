@@ -1,4 +1,4 @@
-vocabulary = [
+vocabulary_data = [
     {"hanzi": "你", "pinyin": "nǐ", "english": "you", "spanish": "tú"},
     {"hanzi": "我", "pinyin": "wǒ", "english": "I / me", "spanish": "yo"},
     {"hanzi": "他", "pinyin": "tā", "english": "he / him", "spanish": "él"},
