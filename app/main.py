@@ -63,6 +63,7 @@ class ChineseLearningApp:
         self.matched_pairs = []
         self.game_buttons = []
         self.current_game_mode = ""
+        self.score_label = None
         
         # Style configuration
         self.setup_styles()
@@ -209,10 +210,19 @@ class ChineseLearningApp:
         """Prepare the selected words based on user preferences"""
         self.current_mode = self.mode_var.get()
         self.num_words = self.words_var.get()
-        self.selected_words = random.sample(self.vocabulary, 
+        self.selected_words = random.sample(self.vocabulary,
                                           min(self.num_words, len(self.vocabulary)))
         self.current_card_index = 0
         self.score = 0
+
+    def update_score_label(self):
+        """Refresh score label during the matching game."""
+        if self.score_label is not None:
+            text = (
+                f"Score: {self.score} | Pairs Found:"
+                f" {len(self.matched_pairs)}/{len(self.selected_words)}"
+            )
+            self.score_label.config(text=text)
     
     def get_question_answer(self, word):
         """Get question and answer based on selected mode"""
@@ -394,11 +404,11 @@ class ChineseLearningApp:
         self.matched_pairs = []
         self.selected_cards = []
         
-        for word in self.selected_words:
+        for pair_id, word in enumerate(self.selected_words):
             question, answer = self.get_question_answer(word)
             self.game_pairs.extend([
-                {"text": question, "pair_id": len(self.game_pairs) // 2, "type": "question"},
-                {"text": answer, "pair_id": len(self.game_pairs) // 2, "type": "answer"}
+                {"text": question, "pair_id": pair_id, "type": "question"},
+                {"text": answer, "pair_id": pair_id, "type": "answer"}
             ])
         
         random.shuffle(self.game_pairs)
@@ -414,10 +424,18 @@ class ChineseLearningApp:
         ttk.Label(header_frame, text="🎮 Matching Game", style='Title.TLabel').pack()
         
         # Score display
-        score_text = f"Score: {self.score} | Pairs Found: {len(self.matched_pairs)}/{len(self.selected_words)}"
-        ttk.Label(header_frame, text=score_text,
-                 font=('Arial', 14, 'bold'), background='#f8f9fa',
-                 foreground='#27ae60').pack(pady=10)
+        score_text = (
+            f"Score: {self.score} | Pairs Found: {len(self.matched_pairs)}/"
+            f"{len(self.selected_words)}"
+        )
+        self.score_label = ttk.Label(
+            header_frame,
+            text=score_text,
+            font=('Arial', 14, 'bold'),
+            background='#f8f9fa',
+            foreground='#27ae60'
+        )
+        self.score_label.pack(pady=10)
         
         mode_text = self.current_mode.replace('-', ' with ').title()
         ttk.Label(header_frame, text=f"Click two cards to match {mode_text}",
@@ -496,8 +514,7 @@ class ChineseLearningApp:
             if len(self.matched_pairs) == len(self.game_pairs):
                 self.root.after(1000, self.show_game_results)
             else:
-                # Update score display
-                self.show_matching_game()
+                self.update_score_label()
         else:
             # No match - reset buttons
             card1.configure(bg='#667eea', activebackground='#5a6fd8')
